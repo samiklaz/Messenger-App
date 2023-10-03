@@ -10,23 +10,23 @@ const LoginScreen = ({ navigation }) => {
     const [password, setPassword] = useState('')
 
 
-    // useEffect(() => {
-    //     const checkLoginStatus = async () => {
-    //         try {
-    //             const token = await AsyncStorage.getItem("authToken")
-    //             if(token) {
-    //                 navigation.navigate("Home")
-    //             } else {
-    //                 // token not found, show the log in screen
-    //             }
-    //         } catch(error) {
-    //             console.log("error == ", error)
-    //         }
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            try {
+                const token = await AsyncStorage.getItem("authToken")
+                if(token) {
+                    navigation.navigate("Home")
+                } else {
+                    // token not found, show the log in screen
+                }
+            } catch(error) {
+                console.log("error == ", error)
+            }
             
-    //     }
+        }
 
-    //     checkLoginStatus()
-    // }, [])
+        checkLoginStatus()
+    }, [])
 
     const handleLogin = async () => {
         const user = {
@@ -95,6 +95,7 @@ const LoginScreen = ({ navigation }) => {
                             }}
                             placeholder='Enter your Password'
                             placeholderTextColor="black"
+                            secureTextEntry
                         />
                     </View>
 
