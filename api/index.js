@@ -6,6 +6,8 @@ const passport = require("passport")
 const LocalStrategy = require("passport-local").Strategy
 const cors = require("cors")
 const jwt = require("jsonwebtoken")
+const multer = require('multer');
+
 
 // locally imported
 const User = require("./models/user")
@@ -215,5 +217,60 @@ app.get("/accepted-friends/:userId", async (req, res) => {
     } catch(error) {
         console.log(error)
         res.status(500).json("Internal server error")
+    }
+})
+
+
+const upload = multer({ storage: storage })
+
+// endpoint to post messages and store it in the Backend
+app.post("/messages", upload.single("imagefile"), async (req, res) => {
+    try {
+       const {senderId, recipientId, messageType, messageText} = req.body 
+       const newMessage = new Message({
+        senderId,
+        recipientId,
+        messageType,
+        messageText,
+        timestamp: new Date(),
+        imageUrl: messageType === "image" 
+       })
+
+       res.status(200).json("Message sent Successfully")
+
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({ error: "Internal Server Error"})
+    }
+})
+
+// endpoint to get the userdetails to design the chat room header
+app.get("/user/:userId", async(req, res) => {
+    try {
+        const {userId} = req.params
+
+        // fetch the user data from the userId
+        const recipientId = await User.findById(userId)
+        res.json(recipientId)
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({error: "Internal Server Error"})
+    }
+})
+
+// endpoint to fetch the messages between two users in the chat room
+app.get("/messages/:senderId/:recipientId", async(req, res) => {
+    try {
+        const {senderId, recipientId} = req.params
+        const messages = await Message.findOne({
+            $or: [
+                {senderId: senderId, recipientId: recipientId},
+                {senderId: recipientId, recipientId: senderId}
+            ]
+        }).populate("senderId", "_id name")
+        res.json(messages)
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({error: "Internal Server Error"})
     }
 })
